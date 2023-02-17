@@ -1,0 +1,10 @@
+name: pydantic-config
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.9
+  - pydantic>=1.9.1
+  - toml=0.10.2
+  - python-dotenv=0.21.0
+  - pyyaml=6.0
