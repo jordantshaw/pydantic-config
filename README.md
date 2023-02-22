@@ -13,7 +13,7 @@ description = "Test application description"
 ```
 
 ```python
-from pydantic_config import SettingsModel
+from src.pydantic_config import SettingsModel
 
 
 class Settings(SettingsModel):
@@ -53,7 +53,7 @@ description = "Test application description"
 ```
 
 ```python
-from pydantic_config import SettingsModel
+from src.pydantic_config import SettingsModel
 
 
 class Settings(SettingsModel):
@@ -91,7 +91,7 @@ item2 = "value2"
 ```
 
 ```python
-from pydantic_config import SettingsModel
+from src.pydantic_config import SettingsModel
 
 
 class Settings(SettingsModel):

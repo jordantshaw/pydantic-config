@@ -36,7 +36,6 @@ class SettingsModel (BaseSettings):
             )
 
 
-
 def config_file_settings(settings: BaseSettings) -> Dict[str, Any]:
     encoding = getattr(settings.__config__, 'config_file_encoding', None)
     files = getattr(settings.__config__, 'config_file', [])

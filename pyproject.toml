@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 name = "pydantic-config"
 description = "Support for Pydantic settings configuration file loading"
 version = "0.1.0"
-authors = ["Jordan Shaw"]
+authors = [{name="Jordan Shaw"}]
 readme = "README.md"
 requires-python = ">=3.7"
 classifiers = [
@@ -19,11 +19,24 @@ classifiers = [
 ]
 
 dependencies = [
-    'pydantic',
-    'pyyaml',
-    'python-dotenv',
-    'toml'
+    'pydantic==1.10.5',
+    'pyyaml==6.0',
+    'python-dotenv==0.21.0',
+    'toml==0.10.2'
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest"
+]
+test = [
+    "pytest"
 ]
 
 [project.urls]
 "Homepage" = "https://github.com/jordantshaw/pydantic-config"
+
+[tool.pytest.ini_options]
+addopts = [
+    "--import-mode=importlib",
+]
