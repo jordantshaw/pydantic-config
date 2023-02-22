@@ -27,7 +27,7 @@ dependencies = [
 
 [project.optional-dependencies]
 dev = [
-    "pytest"
+    "pytest", 'twine', 'build'
 ]
 test = [
     "pytest"
