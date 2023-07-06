@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "pydantic-config"
 description = "Support for Pydantic settings configuration file loading"
-version = "0.1.1"
+version = "0.1.2"
 authors = [{name="Jordan Shaw"}]
 readme = "README.md"
 requires-python = ">=3.7"
@@ -19,7 +19,7 @@ classifiers = [
 ]
 
 dependencies = [
-    'pydantic>=1.10.0',
+    'pydantic<2.0.0, >=1.10.0',
     'pyyaml>=6.0',
     'python-dotenv>=0.21.0',
     'toml>=0.10.2'
