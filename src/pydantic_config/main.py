@@ -68,7 +68,7 @@ class ConfigFileSettingsSource(PydanticBaseEnvSettingsSource):
         self.config_merge_unique = config_merge_unique or self.config.get('config_merge_unique', True)
         self.config_values = self._load_config_values()
 
-    def get_field_value(self, field: FieldInfo, field_name: str) -> tuple[Any, str, bool]:
+    def get_field_value(self, field: FieldInfo, field_name: str) -> Tuple[Any, str, bool]:
         config_val: Any = self.config_values.get(field_name)
         return config_val, field_name, False
 
@@ -127,10 +127,10 @@ class ConfigFileSettingsSource(PydanticBaseEnvSettingsSource):
 
         return file_loaders.get(file.suffix)(str(file), self.file_encoding)
 
-    def __call__(self) -> dict[str, Any]:
-        data: dict[str, Any] = super().__call__()
+    def __call__(self) -> Dict[str, Any]:
+        data: Dict[str, Any] = super().__call__()
 
-        data_lower_keys: list[str] = []
+        data_lower_keys: List[str] = []
         if not self.case_sensitive:
             data_lower_keys = [x.lower() for x in data.keys()]
 
