@@ -22,7 +22,7 @@ class SettingsError(ValueError):
     pass
 
 
-class SettingsConfig(SettingsConfigDict):
+class SettingsConfig(SettingsConfigDict, total=False):
     config_file: Union[ConfigFileType, None]
     config_file_encoding: Union[str, None]
     config_merge: bool
@@ -56,14 +56,15 @@ class ConfigFileSettingsSource(PydanticBaseEnvSettingsSource):
             settings_cls: Type[BaseSettings],
             case_sensitive: Union[bool, None] = None,
             config_file: Union[ConfigFileType, None] = None,
-            file_encoding: Union[str, None] = None,
+            config_file_encoding: Union[str, None] = None,
             config_merge: bool = True,
             config_merge_unique: bool = True,
 
     ) -> None:
         super().__init__(settings_cls, case_sensitive)
+        self.config: SettingsConfig
         self.config_file = config_file or self.config.get('config_file', None)
-        self.file_encoding = file_encoding or self.config.get('file_encoding', None)
+        self.config_file_encoding = config_file_encoding or self.config.get('config_file_encoding', None)
         self.config_merge = config_merge or self.config.get('config_merge', True)
         self.config_merge_unique = config_merge_unique or self.config.get('config_merge_unique', True)
         self.config_values = self._load_config_values()
@@ -125,7 +126,7 @@ class ConfigFileSettingsSource(PydanticBaseEnvSettingsSource):
             '.json': json_file_reader,
         }
 
-        return file_loaders.get(file.suffix)(str(file), self.file_encoding)
+        return file_loaders.get(file.suffix)(str(file), self.config_file_encoding)
 
     def __call__(self) -> Dict[str, Any]:
         data: Dict[str, Any] = super().__call__()
