@@ -1,106 +1,145 @@
-from copy import deepcopy
+import os
 from pathlib import Path
-from typing import Dict, Any, Union, List
+from typing import Dict, Any, Union, List, Type, Tuple, Mapping
 
-from pydantic import BaseSettings, BaseModel
+from pydantic.fields import FieldInfo
+from pydantic_settings import BaseSettings, SettingsConfigDict, PydanticBaseSettingsSource
+from pydantic_settings.sources import PydanticBaseEnvSettingsSource
 
-from .loaders import (
-    ini_file_loader,
-    toml_file_loader,
-    yaml_file_loader,
-    json_file_loader
+from .merge import deep_merge
+from .readers import (
+    ini_file_reader,
+    toml_file_reader,
+    yaml_file_reader,
+    json_file_reader
 )
 
 
-class SettingsModel (BaseSettings):
-
-    class Config:
-
-        config_files: List = []
-        config_file_encoding: str = None
-        config_merge: bool = True
-        config_merge_unique: bool = True
-
-        @classmethod
-        def customise_sources(
-                cls,
-                init_settings,
-                env_settings,
-                file_secret_settings,
-        ):
-            return (
-                init_settings,
-                env_settings,
-                file_secret_settings,
-                config_file_settings,
-            )
+ConfigFileType = Union[Path, str, List[Union[Path, str]], Tuple[Union[Path, str], ...]]
 
 
-def config_file_settings(settings: BaseSettings) -> Dict[str, Any]:
-    encoding = getattr(settings.__config__, 'config_file_encoding', None)
-    files = getattr(settings.__config__, 'config_file', [])
-    config_merge = getattr(settings.__config__, 'config_merge', True)
-    config_merge_unique = getattr(settings.__config__, 'config_merge_unique', True)
-
-    if isinstance(files, str):
-        files = [files]
-
-    config = {}
-    for file in files:
-        if config_merge:
-            config = _deep_merge(
-                base=config,
-                nxt=_load_config_file(file, encoding),
-                unique=config_merge_unique,
-            )
-        else:
-            config.update(_load_config_file(file, encoding))
-
-    return config
+class SettingsError(ValueError):
+    pass
 
 
-def _deep_merge(base: dict, nxt: dict, unique: bool = True) -> dict:
-    """
-    Merges nested dictionaries.
+class SettingsConfig(SettingsConfigDict):
+    config_file: ConfigFileType | None
+    config_file_encoding: str | None
+    config_merge: bool
+    config_merge_unique: bool
 
-    Parameters
-    ----------
-    base: dict
-        The base dictionary to merge into
-    nxt: dict
-        The dictionary to merge into base
-    unique: bool
-        This determines the behavior when merging list values. Lists are appended together which could result
-        in duplicate values.  To avoid duplicates set this value to True.
 
-    """
-    result = deepcopy(base)
+class SettingsModel(BaseSettings):
 
-    for key, value in nxt.items():
-        if isinstance(result.get(key), dict) and isinstance(value, dict):
-            result[key] = _deep_merge(result.get(key), value)
-        elif isinstance(result.get(key), list) and isinstance(value, list):
-            if unique:
-                result[key] = result.get(key) + [i for i in deepcopy(value) if i not in set(result.get(key))]
+    @classmethod
+    def settings_customise_sources(
+            cls,
+            settings_cls: Type[BaseSettings],
+            init_settings: PydanticBaseSettingsSource,
+            env_settings: PydanticBaseSettingsSource,
+            dotenv_settings: PydanticBaseSettingsSource,
+            file_secret_settings: PydanticBaseSettingsSource
+    ) -> Tuple[PydanticBaseSettingsSource, ...]:
+        return (
+            init_settings,
+            env_settings,
+            dotenv_settings,
+            file_secret_settings,
+            ConfigFileSettingsSource(settings_cls),
+        )
+
+
+class ConfigFileSettingsSource(PydanticBaseEnvSettingsSource):
+    """ Settings source class that loads values from one more configuration files. """
+    def __init__(
+            self,
+            settings_cls: type[BaseSettings],
+            case_sensitive: bool | None = None,
+            config_file: ConfigFileType | None = None,
+            file_encoding: str | None = None,
+            config_merge: bool = True,
+            config_merge_unique: bool = True,
+
+    ) -> None:
+        super().__init__(settings_cls, case_sensitive)
+        self.config_file = config_file or self.config.get('config_file', None)
+        self.file_encoding = file_encoding or self.config.get('file_encoding', None)
+        self.config_merge = config_merge or self.config.get('config_merge', True)
+        self.config_merge_unique = config_merge_unique or self.config.get('config_merge_unique', True)
+        self.config_values = self._load_config_values()
+
+    def get_field_value(self, field: FieldInfo, field_name: str) -> tuple[Any, str, bool]:
+        config_val: Any = self.config_values.get(field_name)
+        return config_val, field_name, False
+
+    def prepare_field_value(self, field_name: str, field: FieldInfo, value: Any, value_is_complex: bool) -> Any:
+        if value is None:
+            value = self.config_values.get(field_name if self.case_sensitive else field_name.lower())
+            if value:
+                return value
+
+        return value
+
+    def _lowercase_dict_keys(self, d: Dict):
+        return {k.lower(): self._lowercase_dict_keys(v) if isinstance(v, dict) else v for k, v in d.items()}
+
+    def _load_config_values(self) -> Dict[str, Any]:
+        """ Gets the config values from the configuration files """
+        config_values = self._read_config_files()
+        if self.case_sensitive:
+            return config_values
+
+        return self._lowercase_dict_keys(config_values)
+
+    def _read_config_files(self) -> Dict[str, Any]:
+        """ Reads config files and merges config values if merging is enabled """
+        config_files = self.config_file
+        if config_files is None:
+            return {}
+
+        if isinstance(config_files, (str, os.PathLike)):
+            config_files = [config_files]
+
+        config = {}
+        for file in config_files:
+            file_path = Path(file).expanduser()
+            if not file_path.exists():
+                raise OSError(f"Config file `{file}` not found")
+
+            if self.config_merge:
+                config = deep_merge(
+                    base=config,
+                    nxt=self._read_config_file(file_path),
+                    unique=self.config_merge_unique,
+                )
             else:
-                result[key] = result.get(key) + deepcopy(value)
-        else:
-            result[key] = deepcopy(value)
-    return result
+                config.update(self._read_config_file(file_path))
+        return config
 
+    def _read_config_file(self, file: Path) -> Dict[str, Any]:
+        """ Reads single config file based on file extension """
+        file_loaders = {
+            '.ini': ini_file_reader,
+            '.toml': toml_file_reader,
+            '.yaml': yaml_file_reader,
+            '.json': json_file_reader,
+        }
 
-def _load_config_file(file: str, encoding: str) -> Dict[str, Any]:
-    """ Loads config file with selected encoding """
-    file = Path(file)
-    if not file.exists():
-        raise OSError(f"Could not load file from provided config file: {file}")
+        return file_loaders.get(file.suffix)(str(file), self.file_encoding)
 
-    file_loaders = {
-        '.ini': ini_file_loader,
-        '.toml': toml_file_loader,
-        '.yaml': yaml_file_loader,
-        '.json': json_file_loader,
-    }
+    def __call__(self) -> dict[str, Any]:
+        data: dict[str, Any] = super().__call__()
 
-    return file_loaders.get(file.suffix)(str(file), encoding)
+        data_lower_keys: list[str] = []
+        if not self.case_sensitive:
+            data_lower_keys = [x.lower() for x in data.keys()]
 
+        # As `extra` config is allowed in config settings source, We have to
+        # update data with extra config values from the config files.
+        for config_name, config_value in self.config_values.items():
+            if config_value is not None:
+                if (data_lower_keys and config_name not in data_lower_keys) or (
+                        not data_lower_keys and config_name not in data):
+                    data[config_name] = config_value
+
+        return data

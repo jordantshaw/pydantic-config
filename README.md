@@ -4,6 +4,14 @@ Support for Pydantic settings configuration file loading
 ## Installation
 `pip install pydantic-config`
 
+### Optional Dependencies
+
+Pydantic-Config has the following optional dependencies:
+  - yaml - `pip install pydantic-config[yaml]`
+  - toml - `pip install pydantic-config[toml]`
+
+You can install all the optional dependencies with `pip install pydantic-config[all]`
+
 ## Usage
 
 ```toml
@@ -13,7 +21,7 @@ description = "Test application description"
 ```
 
 ```python
-from pydantic_config import SettingsModel
+from pydantic_config import SettingsModel, SettingsConfig
 
 
 class Settings(SettingsModel):
@@ -21,9 +29,10 @@ class Settings(SettingsModel):
     app_name: str = None
     description: str = None
     log_level: str = 'INFO'
-
-    class Config:
-        config_file = 'config.toml'
+    
+    model_config = SettingsConfig(
+        config_file='config.toml',
+    )
 
 
 settings = Settings()
@@ -53,7 +62,7 @@ description = "Test application description"
 ```
 
 ```python
-from pydantic_config import SettingsModel
+from pydantic_config import SettingsModel, SettingsConfig
 
 
 class Settings(SettingsModel):
@@ -61,15 +70,22 @@ class Settings(SettingsModel):
     app_name: str = 'App Name'
     description: str = None
     log_level: str = 'INFO'
-
-    class Config:
-        config_file = ['config.toml', 'config.json']  # The config.json file will take priority over config.toml
-
+    
+    model_config = SettingsConfig(
+        config_file=['config.toml', 'config.json']  # The config.json file will take priority over config.toml
+    )
 
 settings = Settings()
 print(settings)
 # app_id='1' app_name='Python Application' description='Description from JSON file' log_level='WARNING'
 ```
+
+## Supported file formats
+Currently, the following file formats are supported:
+  - `.yaml` _Requires `pyyaml` package_
+  - `.toml` _Requires `toml` package_
+  - `.json`
+  - `.ini`
 
 
 ## Merging
@@ -91,15 +107,16 @@ item2 = "value2"
 ```
 
 ```python
-from pydantic_config import SettingsModel
+from pydantic_config import SettingsModel, SettingsConfig
 
 
 class Settings(SettingsModel):
     foo: dict = {}
-
-    class Config:
-        config_file = ['config.toml', 'config2.toml']
-        config_merge: bool = True
+    
+    model_config = SettingsConfig(
+        config_file=['config.toml', 'config2.toml'],
+        config_merge= True,
+    )
 
 
 settings = Settings()
