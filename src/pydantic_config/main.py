@@ -23,8 +23,8 @@ class SettingsError(ValueError):
 
 
 class SettingsConfig(SettingsConfigDict):
-    config_file: ConfigFileType | None
-    config_file_encoding: str | None
+    config_file: Union[ConfigFileType, None]
+    config_file_encoding: Union[str, None]
     config_merge: bool
     config_merge_unique: bool
 
@@ -54,9 +54,9 @@ class ConfigFileSettingsSource(PydanticBaseEnvSettingsSource):
     def __init__(
             self,
             settings_cls: type[BaseSettings],
-            case_sensitive: bool | None = None,
-            config_file: ConfigFileType | None = None,
-            file_encoding: str | None = None,
+            case_sensitive: Union[bool, None] = None,
+            config_file: Union[ConfigFileType, None] = None,
+            file_encoding: Union[str, None] = None,
             config_merge: bool = True,
             config_merge_unique: bool = True,
 
