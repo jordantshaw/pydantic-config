@@ -53,7 +53,7 @@ class ConfigFileSettingsSource(PydanticBaseEnvSettingsSource):
     """ Settings source class that loads values from one more configuration files. """
     def __init__(
             self,
-            settings_cls: type[BaseSettings],
+            settings_cls: Type[BaseSettings],
             case_sensitive: Union[bool, None] = None,
             config_file: Union[ConfigFileType, None] = None,
             file_encoding: Union[str, None] = None,
