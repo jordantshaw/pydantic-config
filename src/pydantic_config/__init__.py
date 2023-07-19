@@ -1,1 +1,1 @@
-from .main import SettingsModel
+from .main import SettingsModel, SettingsConfig
