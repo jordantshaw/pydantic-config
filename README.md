@@ -2,7 +2,15 @@
 Support for Pydantic settings configuration file loading
 
 ## Installation
+Pydantic Config can be installed via pip:
+
 `pip install pydantic-config`
+
+Pydantic Config is also available on conda under the conda-forge channel:
+
+`conda install pydantic-config -c conda-forge`
+
+
 
 ### Optional Dependencies
 
