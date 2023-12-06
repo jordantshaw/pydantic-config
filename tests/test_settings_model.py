@@ -82,10 +82,40 @@ def test_invalid_config_file():
         foo: str = 'bar'
 
         model_config = SettingsConfig(
-            config_file=[file]
+            config_file=[file],
+            config_file_required=True,
         )
 
     with pytest.raises(OSError) as exc:
+        Settings()
+
+
+def test_invalid_config_file_not_required():
+    file = 'invalid/file/path/file.toml'
+
+    class Settings(SettingsModel):
+        foo: str = 'bar'
+
+        model_config = SettingsConfig(
+            config_file=[file],
+            config_file_required=False,
+        )
+
+    settings = Settings()
+
+    assert settings.model_dump() == {'foo': 'bar'}
+
+
+def test_empty_config_file():
+    class Settings(SettingsModel):
+        foo: str = 'bar'
+
+        model_config = SettingsConfig(
+            config_file=[],
+            config_file_required=True,
+        )
+
+    with pytest.raises(ValueError) as exc:
         Settings()
 
 
