@@ -56,14 +56,16 @@ class ConfigFileSettingsSource(PydanticBaseEnvSettingsSource):
             settings_cls: Type[BaseSettings],
             case_sensitive: Union[bool, None] = None,
             config_file: Union[ConfigFileType, None] = None,
+            config_file_required: bool = False,
             config_file_encoding: Union[str, None] = None,
             config_merge: bool = True,
-            config_merge_unique: bool = True,
+            config_merge_unique: bool = False,
 
     ) -> None:
         super().__init__(settings_cls, case_sensitive)
         self.config: SettingsConfig
         self.config_file = config_file or self.config.get('config_file', None)
+        self.config_file_required = config_file_required or self.config.get('config_file_required', None)
         self.config_file_encoding = config_file_encoding or self.config.get('config_file_encoding', None)
         self.config_merge = config_merge or self.config.get('config_merge', True)
         self.config_merge_unique = config_merge_unique or self.config.get('config_merge_unique', True)
@@ -95,8 +97,12 @@ class ConfigFileSettingsSource(PydanticBaseEnvSettingsSource):
     def _read_config_files(self) -> Dict[str, Any]:
         """ Reads config files and merges config values if merging is enabled """
         config_files = self.config_file
-        if config_files is None:
-            return {}
+        print(config_files)
+        if not config_files:
+            if self.config_file_required:
+                raise ValueError(f"'config_file' cannot be '{config_files}' when 'config_file_required=True'")
+            else:
+                return {}
 
         if isinstance(config_files, (str, os.PathLike)):
             config_files = [config_files]
@@ -105,7 +111,12 @@ class ConfigFileSettingsSource(PydanticBaseEnvSettingsSource):
         for file in config_files:
             file_path = Path(file).expanduser()
             if not file_path.exists():
-                raise OSError(f"Config file `{file}` not found")
+                if self.config_file_required:
+                    raise OSError(
+                        f"Config file `{file}` not found: A valid file must be provided when 'config_file_required=True'"
+                    )
+                else:
+                    continue
 
             if self.config_merge:
                 config = deep_merge(
