@@ -97,7 +97,7 @@ class ConfigFileSettingsSource(PydanticBaseEnvSettingsSource):
     def _read_config_files(self) -> Dict[str, Any]:
         """ Reads config files and merges config values if merging is enabled """
         config_files = self.config_file
-        print(config_files)
+
         if not config_files:
             if self.config_file_required:
                 raise ValueError(f"'config_file' cannot be '{config_files}' when 'config_file_required=True'")
