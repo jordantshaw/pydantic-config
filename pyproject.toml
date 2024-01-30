@@ -34,20 +34,6 @@ all = [
     'pyyaml>=5.1',
     'tomli>=2.0.0'
 ]
-dev = [
-    'pytest',
-    'twine',
-    'build',
-    'pyyaml>=5.1',
-    'python-dotenv>=0.15.0',
-    'tomli>=2.0.0'
-]
-test = [
-    'pytest',
-    'pyyaml==5.1',
-    'python-dotenv>=0.15.0',
-    'tomli>=2.0.0'
-]
 
 [project.urls]
 "Homepage" = "https://github.com/jordantshaw/pydantic-config"

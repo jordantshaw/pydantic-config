@@ -1,0 +1,13 @@
+# main dependencies
+-e .[all]
+
+# dev dependenies
+python-dotenv>=0.15.0
+
+# test dependencies
+pytest
+
+# build dependencies
+build
+twine
+
