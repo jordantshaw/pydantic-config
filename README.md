@@ -94,6 +94,23 @@ Currently, the following file formats are supported:
   - `.json`
   - `.ini`
 
+## Using dotenv files
+`pydantic-config` supports using dotenv files because `pydantic-settings` natively supports dotenv files. 
+To use a dotenv file in conjunction with the config files simply set `env_file` parameter in `SettingsConfig`.
+The values in the dotenv file will take precedence over the values in the config files.
+
+```python
+class Settings(SettingsModel):
+  app_name: str = None
+  description: str = None
+    
+    model_config = SettingsConfig(
+        env_file='.env',
+        config_file='config.toml',
+    )
+```
+
+
 ## Requiring config files to load
 Config files will attempt to be loaded from the specified file path. By default, if no file is found the file 
 will simply not be loaded (no error occurs). This may be useful if you want to specify config files that 
@@ -109,8 +126,6 @@ parameter from being set to `None` or empty `[]`.
 If your configurations have existing `list` or `dict` variables the contents will be merged by default. To disable
 this behavior and override the contents instead you can set the `config_merge` option to `False` in the settings 
 `Config` class.
-
-
 
 ```toml
 # config.toml
