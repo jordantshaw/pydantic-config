@@ -17,7 +17,7 @@ JSON, INI, TOML, and YAML — in addition to environment variables.
 - [Supported File Formats](#supported-file-formats)
 - [Using `.env` Files](#using-env-files)
 - [Requiring Config Files to Exist](#requiring-config-files-to-exist)
-- [Merging Configuration Values](#merging-configuration-values)
+- [Merging](#merging)
 - [Handling Duplicates in Merged Lists](#handling-duplicates-in-merged-lists)
 - [License](#license)
 
