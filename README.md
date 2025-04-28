@@ -40,7 +40,7 @@ pip install pydantic-config
 Or with conda (via the conda-forge channel):
 ```bash
 conda install pydantic-config -c conda-forge
-
+```
 
 ### Optional Dependencies
 To enable additional file formats, you can install optional dependencies:
