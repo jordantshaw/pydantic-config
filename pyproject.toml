@@ -38,6 +38,9 @@ all = [
 [project.urls]
 "Homepage" = "https://github.com/jordantshaw/pydantic-config"
 
+[tool.setuptools.package-data]
+"pydantic_config" = ["py.typed"]
+
 [tool.pytest.ini_options]
 pythonpath = [
   "src"
