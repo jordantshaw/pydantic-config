@@ -5,6 +5,8 @@ name: Test
 on:
   push:
     branches: [ "*" ]
+  pull_request:
+    branches: [ "*" ]
 
 jobs:
   build:
@@ -13,7 +15,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.8", "3.9", "3.10", "3.11"]
+        python-version: ["3.8", "3.9", "3.10", "3.11", "3.12", "3.13"]
 
     steps:
     - uses: actions/checkout@v3
@@ -35,3 +37,14 @@ jobs:
     - name: Test with pytest
       run: |
         pytest
+
+  test-summary:
+    needs: build
+    runs-on: ubuntu-latest
+    if: always()
+    steps:
+      - name: Check all tests passed
+        run: |
+          if [ "${{ needs.build.result }}" != "success" ]; then
+            exit 1
+          fi
