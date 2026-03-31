@@ -37,3 +37,14 @@ jobs:
     - name: Test with pytest
       run: |
         pytest
+
+  test-summary:
+    needs: build
+    runs-on: ubuntu-latest
+    if: always()
+    steps:
+      - name: Check all tests passed
+        run: |
+          if [ "${{ needs.build.result }}" != "success" ]; then
+            exit 1
+          fi
