@@ -134,6 +134,7 @@ class ConfigFileSettingsSource(PydanticBaseEnvSettingsSource):
             '.ini': ini_file_reader,
             '.toml': toml_file_reader,
             '.yaml': yaml_file_reader,
+            '.yml': yaml_file_reader,
             '.json': json_file_reader,
         }
 
