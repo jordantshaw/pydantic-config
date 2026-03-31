@@ -58,3 +58,16 @@ def config_json_file(tmp_path_factory):
 
     return file_path
 
+
+@pytest.fixture(scope='session')
+def config_yml_file(tmp_path_factory):
+    config = '''
+    app:
+        description: description from config.yml
+    '''
+    file_path = tmp_path_factory.mktemp("data") / "config.yml"
+    with open(file_path, 'w') as file:
+        file.write(config)
+
+    return file_path
+
