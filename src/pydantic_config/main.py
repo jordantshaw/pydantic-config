@@ -58,8 +58,8 @@ class ConfigFileSettingsSource(PydanticBaseEnvSettingsSource):
             config_file: Union[ConfigFileType, None] = None,
             config_file_required: bool = False,
             config_file_encoding: Union[str, None] = None,
-            config_merge: bool = True,
-            config_merge_unique: bool = False,
+            config_merge: Union[bool, None] = None,
+            config_merge_unique: Union[bool, None] = None,
 
     ) -> None:
         super().__init__(settings_cls, case_sensitive)
@@ -67,8 +67,8 @@ class ConfigFileSettingsSource(PydanticBaseEnvSettingsSource):
         self.config_file = config_file or self.config.get('config_file', None)
         self.config_file_required = config_file_required or self.config.get('config_file_required', None)
         self.config_file_encoding = config_file_encoding or self.config.get('config_file_encoding', None)
-        self.config_merge = config_merge or self.config.get('config_merge', True)
-        self.config_merge_unique = config_merge_unique or self.config.get('config_merge_unique', True)
+        self.config_merge = config_merge if config_merge is not None else self.config.get('config_merge', True)
+        self.config_merge_unique = config_merge_unique if config_merge_unique is not None else self.config.get('config_merge_unique', False)
         self.config_values = self._load_config_values()
 
     def get_field_value(self, field: FieldInfo, field_name: str) -> Tuple[Any, str, bool]:
