@@ -119,6 +119,30 @@ def test_empty_config_file():
         Settings()
 
 
+def test_config_merge_disabled(tmp_path):
+    file_a = tmp_path / "a.toml"
+    file_a.write_text('[app]\nname = "from file a"\ndescription = "from file a"')
+    file_b = tmp_path / "b.toml"
+    file_b.write_text('[app]\ndescription = "from file b"')
+
+    class App(BaseModel):
+        name: str = 'default'
+        description: str = None
+
+    class Settings(SettingsModel):
+        app: App
+
+        model_config = SettingsConfig(
+            config_file=[str(file_a), str(file_b)],
+            config_merge=False,
+        )
+
+    settings = Settings()
+    # file b replaces file a entirely — name is not in file b so falls back to default
+    assert settings.app.name == 'default'
+    assert settings.app.description == 'from file b'
+
+
 def test_multiple_config_files(config_toml_file, config_yaml_file):
     class App(BaseModel):
         name: str = 'AppName'
