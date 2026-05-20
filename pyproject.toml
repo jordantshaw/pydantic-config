@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "pydantic-config"
 description = "Support for Pydantic settings configuration file loading"
-version = "0.3.0"
+version = "0.4.0"
 authors = [{name="Jordan Shaw"}]
 readme = "README.md"
 requires-python = ">=3.7"
@@ -37,6 +37,9 @@ all = [
 
 [project.urls]
 "Homepage" = "https://github.com/jordantshaw/pydantic-config"
+
+[tool.setuptools.package-data]
+"pydantic_config" = ["py.typed"]
 
 [tool.pytest.ini_options]
 pythonpath = [
